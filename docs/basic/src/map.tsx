@@ -2,26 +2,38 @@ import React, { useEffect } from 'react';
 import { WebGLEngine } from 'oasis-engine';
 import CameraViewHelper from '../../Scripts/cameraViewHelper'
 import { initAvatarCamera, initScene, initLight } from './utils/env';
+import { PhysXPhysics } from "@oasis-engine/physics-physx";
 import BasicSystem from './basicSystem';
 import PlayerSystem from './playerSystem';
+import MapSystem from './map/index';
 
 export default () => {
     useEffect(() => {
         const engine = new WebGLEngine("canvas");
         engine.canvas.resizeByClientSize();
 
-        const scene = initScene(engine);
-        const rootEntity = scene.createRootEntity("root");
+        PhysXPhysics.initialize()
+        .then(() => {
+            // 初始化物理引擎
+            engine.physicsManager.initialize(PhysXPhysics);
 
-        const basicSystem = new BasicSystem(engine, rootEntity); // 基础系统
+            const scene = initScene(engine);
+            const rootEntity = scene.createRootEntity("root");
 
-        const cameraEntity = rootEntity.createChild("CameraParent");
-        cameraEntity.addComponent(CameraViewHelper);
-        const debug = true;
-        const avatarCamera = initAvatarCamera(rootEntity, cameraEntity, debug);
-        const lightEntity = initLight(rootEntity);
-      
-        const player = new PlayerSystem(engine, rootEntity, avatarCamera, lightEntity, basicSystem);
+            const basicSystem = new BasicSystem(engine, rootEntity); // 基础系统
+
+            // 初始化地图系统
+            const mapSystem = new MapSystem(engine);
+            rootEntity.addChild(mapSystem.mapRoot);
+
+            const cameraEntity = rootEntity.createChild("CameraParent");
+            cameraEntity.addComponent(CameraViewHelper);
+            const debug = true;
+            const avatarCamera = initAvatarCamera(rootEntity, cameraEntity, debug);
+            const lightEntity = initLight(rootEntity);
+        
+            const player = new PlayerSystem(engine, rootEntity, avatarCamera, lightEntity, basicSystem, mapSystem);
+        })
         
     }, [])
     return <div style={{ position: 'relative', height: '500px' }}>

@@ -22,6 +22,12 @@ export function fadeOut(entity: Entity, info: IAnimateInfo, callback?: () => voi
 
 export function floatUp(entity: Entity, info: IAnimateInfo, callback?: () => void) {
     const { duration, position = [0, 0, 0], target = [0, 1, 0] } = info;
+    // @ts-ignore
+    const lastAnimate = entity.animate;
+    if(lastAnimate) {
+        console.log('lastAnimate floatDown',lastAnimate)
+        lastAnimate.stop();
+    }
     animate({
         from: { y: position[1] },
         to: { y: target[1] },
@@ -38,6 +44,12 @@ export function floatUp(entity: Entity, info: IAnimateInfo, callback?: () => voi
 
 export function floatDown(entity: Entity, info: IAnimateInfo, callback?: () => void) {
     const { duration, position = [0, 1, 0], target = [0, 0, 0] } = info;
+     // @ts-ignore
+     const lastAnimate = entity.animate;
+     if(lastAnimate) {
+        console.log('lastAnimate floatDown',lastAnimate)
+         lastAnimate.stop();
+     }
     animate({
         from: { y: position[1] },
         to: { y: target[1] },

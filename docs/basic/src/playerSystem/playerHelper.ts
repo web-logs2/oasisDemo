@@ -33,11 +33,13 @@ export default class PlayerHelper {
         this.engine = engine;
         this.mapSystem = mapSystem;
         this.entity = this.engine.createEntity('player');
+
+        this.engine.on('avatarTargetChange', (newTarget) => this.move(newTarget.x, newTarget.z));
     }
 
     move(x: number, z: number) {
         if(!this.inited) {
-            this.init(x, z);
+            this.setup(x, z);
             return;
         }
         const [ gridX, gridZ ] = this.mapSystem.xz2Grid(x, z);
@@ -89,7 +91,11 @@ export default class PlayerHelper {
         return this.playerGridXY[0] !== centerX || this.playerGridXY[1] !== centerY;
     }
 
-    init(x: number, z: number) {
+    setup(x: number, z: number, player?: Entity) {
+        if(player) {
+            this.player = player;
+        }
+
         const [centerX, centerY] = this.mapSystem.formatXZ(x, z);
         this.entity.transform.setPosition(centerX, 0.1, centerY);
 

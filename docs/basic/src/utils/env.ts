@@ -13,7 +13,8 @@ export function initScene(engine: WebGLEngine) {
     return scene;
 }
 
-export function initCamera(rootEntity: Entity, camera: Entity) {
+export function initAvatarCamera(rootEntity: Entity, cameraEntity: Entity, debug = false) {
+    const camera = cameraEntity.createChild("Camera");
     const cameraConfig = {
         "filedOfView": 45,
         "radius": 8,
@@ -37,7 +38,18 @@ export function initCamera(rootEntity: Entity, camera: Entity) {
 
     const cameraComponent = camera.addComponent(Camera);
     
-    camera.addComponent(Stats);
+    if(debug) {
+        camera.addComponent(Stats);
+        
+        setTimeout(() => {
+            const debugTarget = document.getElementsByClassName('gl-perf')[0] as HTMLElement;
+            if(debugTarget && debugTarget.style) {
+                debugTarget.style.top = '200px';
+                debugTarget.style.left = '200px';
+            }
+        }, 500);
+    }
+
 
     cameraComponent.cullingMask = Layer.Layer0;
     cameraComponent.fieldOfView = filedOfView;
@@ -47,6 +59,8 @@ export function initCamera(rootEntity: Entity, camera: Entity) {
     // 初始化辅助坐标系
     const grid = rootEntity.addComponent(GridControl);
     grid.camera = cameraComponent;
+
+    return camera;
 }
 
 export function initLight(rootEntity: Entity) {

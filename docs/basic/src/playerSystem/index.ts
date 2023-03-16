@@ -33,10 +33,6 @@ export default class PlayerSystem {
         rootEntity.addChild(playerHelper.entity);
         this.playerHelper = playerHelper;
 
-        const sphere = playerHelper.initSphere(0.3);
-        sphere.transform.setPosition(2.5, 0.3, -2.5);
-        mapSystem.addToMap(sphere);
-
         const game = new GameCtrl();
         game.start(engine, rootEntity, camera, scene, lightEntity);
         
@@ -101,28 +97,33 @@ export default class PlayerSystem {
         // 更新玩家周围的物体
         // enterGrids 玩家周围新进入的网格
         // leaveGrids 玩家周围离开的网格
-        const duration = 500;
+        // const duration = 500;
         this.areaSystem.update(gridX, gridZ, (enterGrids, leaveGrids) => {
             enterGrids.forEach((grid) => {
-                if(grid.fill) {
-                    const {x, y, z} = grid.fill.transform.position;
+                
+                if(grid.fill && grid.fill.animate) {
+                    const { duration, target } = grid.fill.animate;
+                    const entity = grid.fill.entity;
+                    const {x, y, z} = entity.transform.position;
                     this.animateSystem.play(AnimateType.FLOAT_UP, { // 上浮
                         type: AnimatePlayType.FLOAT_UP,
-                        entity: grid.fill,
+                        entity,
                         duration,
-                        position: [x, y, z]
+                        position: [x, y, z],
+                        target,
                     })
                 }
             })
             leaveGrids.forEach((grid) => {
-                if(grid.fill) {
-                    const {x, y, z} = grid.fill.transform.position;
+                if(grid.fill && grid.fill.animate) {
+                    const { position, entity, animate: { duration } } = grid.fill;
+                    const {x, y, z} = entity.transform.position;
                     this.animateSystem.play(AnimateType.FLOAT_DOWN, { // 下落
                         type: AnimatePlayType.FLOAT_DOWN,
-                        entity: grid.fill,
+                        entity,
                         duration,
-                        position: [x, y, z],
-                        target: [0, 0.3, 0]
+                        position: [x, y, z],    // 动画的起始位置是当前位置
+                        target: position,       // 动画的目标位置是网格中动画覆盖物的初始位置
                     })
                 }
             })

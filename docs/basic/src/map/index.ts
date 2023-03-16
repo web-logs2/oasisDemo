@@ -1,50 +1,8 @@
 import { Entity, WebGLEngine } from 'oasis-engine';
-
-enum GridType {
-    GRASS = 'grass',
-    WATER = 'water',
-    FOREST = 'forest',
-    SAND = 'sand',
-    GROUND = 'ground',
-}
-enum CoverType {
-    FILL = 'fill', // 填充物（作物、建筑、桌、椅等）
-    MAP = 'map', // 非填充物（掉落物 种子、金币等）
-    HOVER = 'hover', // 鼠标悬浮
-}
-interface CoverItem {
-    entity: Entity;
-    coverType: CoverType;
-    gridX: number; // grid x坐标 grid 坐标表示网格的位置，坐标值为整数，取左上角的位置表示网格
-    gridZ: number; // grid Z坐标
-    /**
-     * (-1, -1)---(0, -1)----(1, -1)
-     * ｜           ｜          ｜
-     * ｜ (-1, -1)  ｜  (0, -1) ｜
-     * ｜           ｜          ｜
-     * (-1, 0)---(0, 0)------(1, 0) X ->
-     * ｜           ｜          ｜
-     * ｜  (-1, 0)  ｜  (0, 0)  ｜
-     * ｜           ｜          ｜
-     * (-1, 1)---(0, 1)----(1, 1)
-     *              |
-     *              v
-     *              Z
-     */
-    bounds: number[]; // 添加实体需要占据的区域，从 gridX, gridZ 开始，往 x，z 正方向占据的区域大小
-}
-export interface IGrid {
-    id: string; // x.z.y
-    type: GridType;
-    fill: Entity | undefined;   // 当前的网格是否被占据
-    map: Entity | undefined;    // 当前网格的贴图 田地、瓷砖、特殊的贴图等等
-    hover: CoverItem[] | undefined; // 当前网格上的悬浮物
-    cover: CoverItem[] | undefined; // 当前网格上的覆盖物, include => fill + map（填充物（作物、建筑、桌、椅等） + 非填充物（掉落物 种子、金币等））
-}
+import { GridType, CoverType, CoverItem, IGrid } from './interface';
+import { addColliderCubes, initPlane } from './helper'
 
 const GRID_SIZE = 1; // 网格大小
-
-import { addColliderCubes, initPlane } from './helper'
 
 /**
  * 地图系统 在 x-z 平面上，以网格为单位，管理地图上的实体
@@ -101,32 +59,43 @@ export default class MapSystem {
         });
     }
 
-    addToMap(object: Entity, coverType: CoverType = CoverType.FILL) {
+    addToMap(object: Entity, options: Partial<CoverItem> = { coverType: CoverType.FILL }) {
         const { x, y, z } = object.transform.position;
-        const [ gridX, gridZ ] = this.xz2Grid(x, z);
+        const [ gridX, gridZ ] = this.xz2Grid(x, z); // 获取网格坐标（序号）
         const id = this.gridXZ2Key(gridX, gridZ);
         const grid = this.cache.get(id) as IGrid;
         if(!grid) {
             return false;
         }
-        if(coverType === CoverType.FILL) {
-            grid.fill = object;
-        }
-        if(coverType === CoverType.MAP) {
-            grid.map = object;
-        }
-        if(!grid.cover) {
-            grid.cover = []
-        }
+
+        const entity = this.engine.createEntity('grid');
+        entity.transform.position.set(x, 0, z); // 网格中心位置
+        this.mapRoot.addChild(entity);
+
+        const [centerX, centerZ] = this.gridXZ2xz(gridX, gridZ); // 网格中心的 x, z 笛卡尔坐标
+        const [offsetX, offsetZ] = [x - centerX, z - centerZ]; // 网格中心到 object 的偏移量
+
+        object.transform.position.set(offsetX, y, offsetZ); // 将 object 移动到网格中心（局部坐标系）
+        entity.addChild(object);
+
+        const { coverType = CoverType.FILL, animate, position } = options; // , gridX, gridZ
         const coverItem = {
             entity: object,
-            coverType: CoverType.FILL,
+            coverType,
             gridX,
             gridZ,
             bounds: [1, 1],
+            position: position ? position : [offsetX, y, offsetZ], // options 中的位置优先， 局部坐标系
+            animate,
+        } as CoverItem;
+
+        switch(coverType) {
+            case CoverType.FILL:
+                grid.fill = coverItem;
+                break;
         }
-        grid.cover.push(coverItem);
-        this.mapRoot.addChild(object);
+
+        
     }
 
     // 根据 mapSystem 动态设置围栏（cube），限制玩家移动

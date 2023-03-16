@@ -1,0 +1,8 @@
+{
+  "WalkSpeed": 1.8,
+  "WalkEdge": 3,
+  "RunSpeed": 4,
+  "MaxSpeed": 6,
+  "RotateSpeed": 360,
+  "bornRotation": 180
+}

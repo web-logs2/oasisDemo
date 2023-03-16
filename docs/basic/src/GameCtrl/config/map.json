@@ -1,0 +1,4 @@
+{
+  "Default": { "bornPosition": { "x": 0, "y": 0, "z": 0 } },
+  "Square": { "bornPosition": { "x": 4, "y": 0, "z": 4 } }
+}

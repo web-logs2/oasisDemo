@@ -1,0 +1,10 @@
+{
+  "filedOfView": 45,
+  "radius": 8,
+  "buffer": 0,
+  "theta": 0,
+  "phi": 90,
+  "minPolarAngle": 50,
+  "maxPolarAngle": 90,
+  "altitude": 2
+}

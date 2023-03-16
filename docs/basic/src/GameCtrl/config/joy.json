@@ -1,0 +1,11 @@
+{
+  "joyRect": {
+    "x": 0,
+    "y": 0.6,
+    "width": 0.5,
+    "height": 0.4
+  },
+  "lightEdge": 0.4,
+  "backgroundSize": 200,
+  "pointerSize": 70
+}

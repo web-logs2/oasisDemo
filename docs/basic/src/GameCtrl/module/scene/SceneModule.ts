@@ -35,17 +35,10 @@ export class SceneModule {
       // !SceneDataManager.getAvatar(data.id) && SceneDataManager.addAvatar(data.id, UnitFactory.createUnit(data));
       if(!SceneDataManager.getAvatar(data.id)) {
         const unit = UnitFactory.createUnit(data);
-        // console.log('unit', unit)
-        engine.dispatch('createUnit', unit)
+        engine.dispatch('gameCtrlCreateUnit', unit)
         SceneDataManager.addAvatar(data.id, unit);
       }
     }
-  //  setTimeout(() => {
-  //   SceneDataManager.getAvatar('1002').control.behaviorControl.addBehavior(EnumBehavior.WalkTo, 
-  //     { 
-  //       data: { x: 0, y: 0, z: 0 }
-  //   });
-  //  }, 2000)
   }
 
   private _onQuitAvatar_ToG(quitUserIds: string[]) {

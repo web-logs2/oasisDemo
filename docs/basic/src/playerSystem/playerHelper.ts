@@ -1,5 +1,5 @@
 import { BlinnPhongMaterial, Entity, PrimitiveMesh, MeshRenderer, WebGLEngine } from 'oasis-engine';
-import MapSystem from ".";
+import MapSystem from "../map/index";
 
 export default class PlayerHelper {
     public entity: Entity;
@@ -21,6 +21,14 @@ export default class PlayerHelper {
     private lastDirEntity: number = 0;
     private dirEntity: Entity[];
 
+    get rotateY() {
+        if(this.player) {
+            return this.player.transform.rotation.y;
+        } else {
+            return 0;
+        }
+    }
+
     constructor(engine: WebGLEngine, mapSystem: MapSystem) {
         this.engine = engine;
         this.mapSystem = mapSystem;
@@ -39,7 +47,7 @@ export default class PlayerHelper {
             this.updateHelper(gridX, gridZ);
             this.entity.transform.setPosition(centerX, 0, centerZ);
 
-            this.engine.dispatch('playerMove', {
+            this.engine.dispatch('gridCross', {
                 gridX,
                 gridZ,
                 x,

@@ -2,10 +2,14 @@ import { Entity, WebGLEngine } from "oasis-engine";
 import ResourceSystem from "../resourceSystem";
 
 import Foot from './foot';
+import FloatUP from "./floatUp";
+import FloatDOWN from "./floatDown";
 import { AnimateType, AnimatePlayType, IAnimateInfo } from './interface';
 
 const animates = {
     [AnimateType.FOOT]: Foot,
+    [AnimateType.FLOAT_UP]: FloatUP,
+    [AnimateType.FLOAT_DOWN]: FloatDOWN,
 }
 
 export default class AnimateSystem {
@@ -29,6 +33,12 @@ export default class AnimateSystem {
         } else {
             animateInstance = this.animatePool.get(animate);
         }
+        // TODO loop animation 需要持久化 长期存在
+        if(info.loop) {
+            console.log('loop');
+        }
+
+        // TODO 在对同一个 entity 进行动画时，需要先停止之前的动画
         animateInstance.play(info);
     }
 }

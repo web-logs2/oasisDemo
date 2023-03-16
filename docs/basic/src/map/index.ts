@@ -33,11 +33,12 @@ interface CoverItem {
      */
     bounds: number[]; // 添加实体需要占据的区域，从 gridX, gridZ 开始，往 x，z 正方向占据的区域大小
 }
-interface IGrid {
+export interface IGrid {
     id: string; // x.z.y
     type: GridType;
     fill: Entity | undefined;   // 当前的网格是否被占据
     map: Entity | undefined;    // 当前网格的贴图 田地、瓷砖、特殊的贴图等等
+    hover: CoverItem[] | undefined; // 当前网格上的悬浮物
     cover: CoverItem[] | undefined; // 当前网格上的覆盖物, include => fill + map（填充物（作物、建筑、桌、椅等） + 非填充物（掉落物 种子、金币等））
 }
 
@@ -80,6 +81,17 @@ export default class MapSystem {
         })
     }
 
+    static isGrid(grid: any) {
+        return !!(grid && grid.id);
+    }
+
+    static isEqual(grid1: any, grid2: any) {
+        // grid undefined / undefined grid
+        if(this.isGrid(grid1) !== this.isGrid(grid2)) return false;
+        // grid grid
+        return grid1.id === grid2.id;
+    }
+
     addToMap(object: Entity, coverType: CoverType = CoverType.FILL) {
         const { x, y, z } = object.transform.position;
         const [ gridX, gridZ ] = this.xz2Grid(x, z);
@@ -109,17 +121,17 @@ export default class MapSystem {
     }
 
     // 根据 mapSystem 动态设置围栏（cube），限制玩家移动
-    updateCollisionCubes(gridX: number, gridZ: number) {
-        const grids = this.getNineGrids(gridX, gridZ);
+    updateCollisionCubes(grids: (IGrid | undefined)[], gridX: number, gridZ: number) {
         grids.forEach((grid, index) => {
             // 1 2 3
             // 4 5 6
             // 7 8 9
             if(!grid && this.collisionCubes[index + 1]) {
                 const dir = index + 1;
-                const [nearGridX, nearGrixZ] = this.getGridNear(gridX, gridZ, dir);
+                const [nearGridX, nearGrixZ] = this.getGridOffset(gridX, gridZ, dir);
                 const [x, y] = this.gridXZ2xz(nearGridX, nearGrixZ);
                 const box = this.collisionCubes[dir];
+                // 暂时不考虑碰撞体的高度
                 box.transform.setPosition(x, 0.5, y);
             };
         });
@@ -129,6 +141,11 @@ export default class MapSystem {
     gridUpdate(grid: IGrid) {
         const { id, type, fill, map } = grid;
         this.cache.set(id, grid);
+    }
+
+    getAroundGrids(gridX: number, gridZ: number, radius: number) {
+        // TODO: 待优化
+        return this.getNineGrids(gridX, gridZ);
     }
 
     /**
@@ -154,7 +171,7 @@ export default class MapSystem {
         ];
     }
 
-    getGridNear(gridX: number, gridZ: number, dir: number) {
+    getGridOffset(gridX: number, gridZ: number, dir: number) {
         switch(dir) {
             case 1:
                 return [gridX - 1, gridZ - 1];

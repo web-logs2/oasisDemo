@@ -138,7 +138,7 @@ export default () => {
             })
         })
 
-        engine.on('createUnit', (unit) => {
+        engine.on('gameCtrlCreateUnit', (unit) => {
             // 监听人物移动 - target change
             unit.entity.addComponent(ViewHelper);
         })

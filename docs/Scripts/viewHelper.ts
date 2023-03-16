@@ -1,4 +1,4 @@
-import { Script, Vector3 } from "oasis-engine";
+import { Script } from "oasis-engine";
 
 export default class ViewHelper extends Script {
     private x: number

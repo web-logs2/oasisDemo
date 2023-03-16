@@ -32,20 +32,18 @@ export default class PlayerHelper {
             this.init(x, z);
             return;
         }
-        const [ gridX, gridZ ] = this.mapSystem.xz2GridXZ(x, z);
-        const [ centerX, centerY ] = this.mapSystem.gridXZ2xz(gridX, gridZ);
-        if(this.isMoved(centerX, centerY)) {
-            this.playerGridXY = [centerX, centerY];
+        const [ gridX, gridZ ] = this.mapSystem.xz2Grid(x, z);
+        const [ centerX, centerZ ] = this.mapSystem.gridXZ2xz(gridX, gridZ);
+        if(this.isMoved(centerX, centerZ)) {
+            this.playerGridXY = [centerX, centerZ];
             this.updateHelper(gridX, gridZ);
-            this.entity.transform.setPosition(centerX, 0, centerY);
+            this.entity.transform.setPosition(centerX, 0, centerZ);
 
-            const grids = this.mapSystem.getNineGrids(gridX, gridZ);
             this.engine.dispatch('playerMove', {
-                centerX: gridX,
-                centerZ: gridZ,
+                gridX,
+                gridZ,
                 x,
-                z,
-                grids,
+                z, 
             });
 
             if(this.player) {

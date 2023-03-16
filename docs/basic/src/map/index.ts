@@ -43,7 +43,7 @@ interface IGrid {
 
 const GRID_SIZE = 1; // 网格大小
 
-import { initPlane, grids } from './helper'
+import { addColliderCubes, initPlane, mockGrids } from './helper'
 
 /**
  * 地图系统 在 x-z 平面上，以网格为单位，管理地图上的实体
@@ -60,11 +60,15 @@ import { initPlane, grids } from './helper'
 export default class MapSystem {
     public mapRoot: Entity;
     private cache: Map<string, IGrid> = new Map();
+
+    private collisionCubes: {[key: number]: Entity} = {};
     
     constructor(engine: WebGLEngine) {
         this.mapRoot = new Entity(engine, 'mapRoot');
+        this.collisionCubes = addColliderCubes(engine, this.mapRoot);
 
-        grids.forEach(gridData => {
+        // mock map data
+        mockGrids.forEach(gridData => {
             // set cache map
             this.cache.set(gridData.id, gridData as IGrid);
             
@@ -78,7 +82,7 @@ export default class MapSystem {
 
     addToMap(object: Entity, coverType: CoverType = CoverType.FILL) {
         const { x, y, z } = object.transform.position;
-        const [ gridX, gridZ ] = this.xz2GridXZ(x, z);
+        const [ gridX, gridZ ] = this.xz2Grid(x, z);
         const id = this.gridXZ2Key(gridX, gridZ);
         const grid = this.cache.get(id) as IGrid;
         if(!grid) {
@@ -102,6 +106,24 @@ export default class MapSystem {
         }
         grid.cover.push(coverItem);
         this.mapRoot.addChild(object);
+    }
+
+    // 根据 mapSystem 动态设置围栏（cube），限制玩家移动
+    updateCollisionCubes(gridX: number, gridZ: number) {
+        const grids = this.getNineGrids(gridX, gridZ);
+        grids.forEach((grid, index) => {
+            // 1 2 3
+            // 4 5 6
+            // 7 8 9
+            if(!grid && this.collisionCubes[index + 1]) {
+                const dir = index + 1;
+                const [nearGridX, nearGrixZ] = this.getGridNear(gridX, gridZ, dir);
+                const [x, y] = this.gridXZ2xz(nearGridX, nearGrixZ);
+                const box = this.collisionCubes[dir];
+                box.transform.setPosition(x, 0.5, y);
+            };
+        });
+        
     }
 
     gridUpdate(grid: IGrid) {
@@ -220,7 +242,7 @@ export default class MapSystem {
      */
     coverTest(xz: number[], bounds: number[]) {
         const [x, z] = xz;
-        const [ gridX, gridZ ] = this.xz2GridXZ(x, z);
+        const [ gridX, gridZ ] = this.xz2Grid(x, z);
         const keys = this.getCoverGridKeys(gridX, gridZ, bounds);
         keys.forEach(({key}) => {
             const grid = this.cache.get(key);
@@ -266,7 +288,7 @@ export default class MapSystem {
     }
 
     formatXZ(x: number, z: number) {
-        const [ gridX, gridZ ] = this.xz2GridXZ(x, z);
+        const [ gridX, gridZ ] = this.xz2Grid(x, z);
         return this.gridXZ2xz(gridX, gridZ);
     }
 
@@ -288,7 +310,7 @@ export default class MapSystem {
      * @param z 
      * @returns 
      */
-    xz2GridXZ(x: number, z: number) {
+    xz2Grid(x: number, z: number) {
         /**
         * (0, 0) --------> X > 0
         * ｜

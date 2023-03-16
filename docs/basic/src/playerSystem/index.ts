@@ -3,8 +3,9 @@ import { PhysXPhysics } from "@oasis-engine/physics-physx";
 import BasicSystem from "../basicSystem";
 import MapSystem from "../map/index";
 import { addColliderCubes } from '../map/helper';
-import { GameCtrl, GameState } from '../GameCtrl/index';
-import { ModuleEvent, SocketEvent } from '../GameCtrl/event'
+import { GameCtrl } from '../GameCtrl/index';
+import { SocketEvent } from '../GameCtrl/event'
+import AnimateSystem from '../animateSystem/index';
 import { AnimateType, AnimatePlayType } from '../animateSystem/interface';
 import ViewHelper  from '../../../Scripts/viewHelper';
 import PlayerHelper from '../map/playerHelper';
@@ -14,7 +15,7 @@ export default class PlayerSystem {
     private rootEntity: Entity;
     private basicSystem: BasicSystem;
     private mapSystem: MapSystem;
-
+    private animateSystem: AnimateSystem;
     private playerHelper: PlayerHelper;
 
     cubes: any;
@@ -22,6 +23,7 @@ export default class PlayerSystem {
         this.engine = engine;
         this.rootEntity = rootEntity;
         this.basicSystem = basicSystem;
+        this.animateSystem = basicSystem.animateSystem;
 
         const scene = engine.sceneManager.activeScene;
         
@@ -30,6 +32,9 @@ export default class PlayerSystem {
             // 初始化物理引擎
             engine.physicsManager.initialize(PhysXPhysics);
 
+
+            this.cubes = addColliderCubes(engine, rootEntity);
+            
             const mapSystem = new MapSystem(engine);
             rootEntity.addChild(mapSystem.mapRoot);
             this.mapSystem = mapSystem;
@@ -44,7 +49,7 @@ export default class PlayerSystem {
 
             const game = new GameCtrl();
             game.start(engine, rootEntity, camera, scene, lightEntity);
-            this.cubes = addColliderCubes(engine, rootEntity);
+            
 
             const myAvatar = {
                 isSelf: true,
@@ -83,31 +88,19 @@ export default class PlayerSystem {
         this.engine.on('avatarTargetChange', (newTarget) => this.playerHelper.move(newTarget.x, newTarget.z));
 
         // 玩家从一个网格移动到另一个网格
-        this.engine.on('playerMove', ({grids, centerX, centerZ, x, z}) => {
+        this.engine.on('playerMove', ({gridX, gridZ, x, z}) => {
             if(this.playerHelper.player){
                 const { y: rotateY } = this.playerHelper.player.transform.rotation;
 
-                this.basicSystem.animateSystem.play(AnimateType.FOOT, {
+                this.animateSystem.play(AnimateType.FOOT, {
                     type: AnimatePlayType.FADE_OUT,
                     duration: 1500,
                     position: [x, 1, z],
                     rotation: [0, rotateY, 0],
                 })
             }
-
-            grids.forEach((grid, index) => {
-                // 根据 mapSystem 动态设置围栏（cube），限制玩家移动
-                if(!grid && this.cubes[index + 1]) {
-                    const dir = index + 1;
-                    const [nearGridX, nearGrixZ] = this.mapSystem.getGridNear(centerX, centerZ, dir);
-                    const [x, y] = this.mapSystem.gridXZ2xz(nearGridX, nearGrixZ);
-                    const box = this.cubes[dir];
-                    box.transform.setPosition(x, 0.5, y);
-                }
-                if(grid?.fill) {
-                 
-                }
-            });
+            // 根据 mapSystem 动态设置围栏（cube），限制玩家移动
+            this.mapSystem.updateCollisionCubes(gridX, gridZ)
         });
     }
 

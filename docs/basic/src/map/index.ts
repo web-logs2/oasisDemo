@@ -44,7 +44,7 @@ export interface IGrid {
 
 const GRID_SIZE = 1; // 网格大小
 
-import { addColliderCubes, initPlane, mockGrids } from './helper'
+import { addColliderCubes, initPlane } from './helper'
 
 /**
  * 地图系统 在 x-z 平面上，以网格为单位，管理地图上的实体
@@ -60,25 +60,17 @@ import { addColliderCubes, initPlane, mockGrids } from './helper'
  */
 export default class MapSystem {
     public mapRoot: Entity;
+    private engine: WebGLEngine;
     private cache: Map<string, IGrid> = new Map();
 
     private collisionCubes: {[key: number]: Entity} = {};
     
-    constructor(engine: WebGLEngine) {
+    constructor(engine: WebGLEngine, grids: IGrid[] = []) {
         this.mapRoot = new Entity(engine, 'mapRoot');
+        this.engine = engine;
         this.collisionCubes = addColliderCubes(engine, this.mapRoot);
 
-        // mock map data
-        mockGrids.forEach(gridData => {
-            // set cache map
-            this.cache.set(gridData.id, gridData as IGrid);
-            
-            const [gridX, gridY] = this.key2GridXZ(gridData.id);
-            const xz = this.gridXZ2xz(gridX, gridY);         
-            const plane =  initPlane(engine, 0.8, 0.8, gridData.type)
-            plane.transform.position.set(xz[0], 0.01, xz[1]);
-            this.mapRoot.addChild(plane);
-        })
+        this.loadMap(grids as IGrid[]);
     }
 
     static isGrid(grid: any) {
@@ -90,6 +82,23 @@ export default class MapSystem {
         if(this.isGrid(grid1) !== this.isGrid(grid2)) return false;
         // grid grid
         return grid1.id === grid2.id;
+    }
+
+    // 加载一个地图
+    public loadMap(grids: IGrid[], debug = true) {
+        // TODO 待增加 地图更新的逻辑
+        grids.forEach(gridData => {
+            // set cache map
+            this.cache.set(gridData.id, gridData as IGrid);
+
+            if(debug) {
+                const [gridX, gridY] = this.key2GridXZ(gridData.id);
+                const xz = this.gridXZ2xz(gridX, gridY);         
+                const plane =  initPlane(this.engine, 0.8, 0.8, gridData.type)
+                plane.transform.position.set(xz[0], 0.01, xz[1]);
+                this.mapRoot.addChild(plane);
+            }
+        });
     }
 
     addToMap(object: Entity, coverType: CoverType = CoverType.FILL) {

@@ -5,7 +5,8 @@ import { initAvatarCamera, initScene, initLight } from './utils/env';
 import { PhysXPhysics } from "@oasis-engine/physics-physx";
 import BasicSystem from './basicSystem';
 import PlayerSystem from './playerSystem';
-import MapSystem from './map/index';
+import MapSystem, { IGrid } from './map/index';
+import { mockGrids } from './map/helper';
 
 export default () => {
     useEffect(() => {
@@ -23,7 +24,7 @@ export default () => {
             const basicSystem = new BasicSystem(engine, rootEntity); // 基础系统
 
             // 初始化地图系统
-            const mapSystem = new MapSystem(engine);
+            const mapSystem = new MapSystem(engine, mockGrids as IGrid[]);
             rootEntity.addChild(mapSystem.mapRoot);
 
             const cameraEntity = rootEntity.createChild("CameraParent");

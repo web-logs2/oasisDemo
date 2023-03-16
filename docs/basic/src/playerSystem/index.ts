@@ -111,7 +111,9 @@ export default class PlayerSystem {
         const grids = this.mapSystem.getNineGrids(gridX, gridZ);
         this.mapSystem.updateCollisionCubes(grids, gridX, gridZ);
 
-        // 
+        // 更新玩家周围的物体
+        // enterGrids 玩家周围新进入的网格
+        // leaveGrids 玩家周围离开的网格
         this.areaSystem.update(gridX, gridZ, (enterGrids, leaveGrids) => {
             enterGrids.forEach((grid) => {
                 if(grid.fill) {

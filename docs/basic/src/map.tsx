@@ -1,5 +1,19 @@
 import React, { useEffect } from 'react';
-import { BlinnPhongMaterial, MeshRenderer, PrimitiveMesh, WebGLEngine } from 'oasis-engine';
+import { BlinnPhongMaterial, MeshRenderer, PrimitiveMesh, WebGLEngine, 
+    Engine,
+    Mesh,
+    Shader,
+    BaseMaterial,
+    BufferMesh,
+    IndexFormat,
+    BufferBindFlag,
+    Buffer,
+    BufferUsage,
+    VertexElement,
+    VertexElementFormat,
+    Matrix,
+    RenderFace,
+} from 'oasis-engine';
 import CameraViewHelper from '../../Scripts/cameraViewHelper'
 import { initAvatarCamera, initScene, initLight } from './utils/env';
 import { PhysXPhysics } from "@oasis-engine/physics-physx";
@@ -9,6 +23,7 @@ import UISystem from './uiSystem';
 import MapSystem from './map/index';
 import { mockGrids } from './map/helper';
 import { IGrid } from './map/interface';
+import Grass from './objects/grass';
 
 function initSphere(engine: WebGLEngine, radius = 0.2) {
     const entity = engine.createEntity('sphere');
@@ -42,20 +57,20 @@ export default () => {
 
             const sphere = initSphere(engine, 0.3);
             sphere.transform.setPosition(2.5, 0.3, -2.5);
-            mapSystem.addToMap(sphere, 
-                { 
+            mapSystem.addToMap(sphere, {
                 animate: {
                     type: 'enterLeave',
                     target: [0, 2, 0],
                     duration: 500,
                 }
-             }
-             );
+            });
 
             const cameraEntity = rootEntity.createChild("CameraParent");
             cameraEntity.addComponent(CameraViewHelper);
+            
             const debug = true;
             const avatarCamera = initAvatarCamera(rootEntity, cameraEntity, debug);
+            
             const lightEntity = initLight(rootEntity);
 
             const uiSystem = new UISystem({
@@ -78,6 +93,9 @@ export default () => {
                     gridZ: e.gridZ,
                 }])
             })
+
+            const grass = new Grass(engine, mapSystem);
+            rootEntity.addChild(grass.grassEntity);
         })
         
         

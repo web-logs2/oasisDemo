@@ -18,14 +18,16 @@ const GRID_SIZE = 1; // 网格大小
  */
 export default class MapSystem {
     public mapRoot: Entity;
+    public grids: IGrid[] = [];
+
     private engine: WebGLEngine;
     private cache: Map<string, IGrid> = new Map();
-
     private collisionCubes: {[key: number]: Entity} = {};
     
     constructor(engine: WebGLEngine, grids: IGrid[] = []) {
         this.mapRoot = new Entity(engine, 'mapRoot');
         this.engine = engine;
+        this.grids = grids;
         this.collisionCubes = addColliderCubes(engine, this.mapRoot);
 
         this.loadMap(grids as IGrid[]);

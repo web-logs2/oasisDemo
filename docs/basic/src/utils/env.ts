@@ -37,6 +37,7 @@ export function initAvatarCamera(rootEntity: Entity, cameraEntity: Entity, debug
     camera.transform.position.y += 2;
 
     const cameraComponent = camera.addComponent(Camera);
+    // cameraComponent.enableFrustumCulling = false;
     
     if(debug) {
         camera.addComponent(Stats);

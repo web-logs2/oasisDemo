@@ -17,7 +17,7 @@ export default class PlayerHelper {
     private core7: Entity;
     private core8: Entity;
     private core9: Entity;
-    private playerGridXY: number[] = [0, 0];
+    private playerGridXZ: number[] = [0, 0];
     private lastDirEntity: number = 0;
     private dirEntity: Entity[];
 
@@ -30,7 +30,7 @@ export default class PlayerHelper {
     }
 
     get grid() {
-        return this.playerGridXY;
+        return this.playerGridXZ;
     }
 
     constructor(engine: WebGLEngine, mapSystem: MapSystem) {
@@ -38,7 +38,13 @@ export default class PlayerHelper {
         this.mapSystem = mapSystem;
         this.entity = this.engine.createEntity('player');
 
-        this.engine.on('avatarTargetChange', (newTarget) => this.move(newTarget.x, newTarget.z));
+        this.engine.on('avatarPlay', () => {
+            if(this.player) {
+                const { x, z } = this.player.transform.position;
+                this.move(x, z)
+            }
+            
+        });
     }
 
     move(x: number, z: number) {
@@ -47,11 +53,7 @@ export default class PlayerHelper {
             return;
         }
         const [ gridX, gridZ ] = MapSystem.xz2Grid(x, z);
-        const [ centerX, centerZ ] = MapSystem.gridXZ2xz(gridX, gridZ);
-        if(this.isMoved(centerX, centerZ)) {
-            this.playerGridXY = [centerX, centerZ];
-            this.updateHelper(gridX, gridZ);
-            this.entity.transform.setPosition(centerX, 0, centerZ);
+        if(this.isMoved(gridX, gridZ)) {
 
             this.engine.dispatch('gridCross', {
                 gridX,
@@ -59,6 +61,12 @@ export default class PlayerHelper {
                 x,
                 z, 
             });
+
+            this.playerGridXZ = [gridX, gridZ];
+            this.updateHelper(gridX, gridZ);
+
+            const [ centerX, centerZ ] = MapSystem.gridXZ2xz(gridX, gridZ);
+            this.entity.transform.setPosition(centerX, 0, centerZ);
 
             if(this.player) {
                 const forward = this.getForwardDir(this.player.transform.rotation.y);
@@ -91,19 +99,19 @@ export default class PlayerHelper {
         return forward;
     }
 
-    isMoved(centerX: number, centerY: number) {
-        return this.playerGridXY[0] !== centerX || this.playerGridXY[1] !== centerY;
+    isMoved(gridX: number, gridZ: number) {
+        return this.playerGridXZ[0] !== gridX || this.playerGridXZ[1] !== gridZ;
     }
 
     setup(x: number, z: number, player?: Entity) {
         if(player) {
             this.player = player;
         }
-
+        const [ gridX, gridZ ] = MapSystem.xz2Grid(x, z);
         const [centerX, centerY] = this.mapSystem.formatXZ(x, z);
         this.entity.transform.setPosition(centerX, 0.1, centerY);
 
-        this.playerGridXY = [centerX, centerY];
+        this.playerGridXZ = [gridX, gridZ];
 
         const sphere = this.initSphere();
         this.entity.addChild(sphere);

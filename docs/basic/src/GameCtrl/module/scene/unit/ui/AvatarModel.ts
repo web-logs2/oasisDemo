@@ -9,6 +9,7 @@ import {
   WrapMode
 } from "oasis-engine";
 import { EnumAnimationState } from "../enum/EnumAnimationState";
+import { GameCtrl } from "../../../..";
 
 /**
  * 模型和动画
@@ -21,6 +22,11 @@ export class AvatarModel extends Component {
     const { _animator: animator } = this;
     if (!animator) {
       return;
+    }
+    if(stateName !== EnumAnimationState.Idle) {
+      // console.log('play', stateName, speed)
+      // add test listener
+      GameCtrl.ins.engine.dispatch('avatarPlay', stateName)
     }
     animator.speed = speed;
     if (this._stateName !== stateName && animator.findAnimatorState(stateName)) {

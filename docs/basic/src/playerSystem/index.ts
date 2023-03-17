@@ -73,22 +73,14 @@ export default class PlayerSystem {
     }
 
     bindEvent() {
-        // 注册人物移动的监听 - target change
-        this.engine.on('gameCtrlCreateUnit', (unit) => unit.entity.addComponent(ViewHelper));
-
         // avator model loaded
         this.engine.on('avatarModelLoaded', (avatar) => { 
             const { modelEntity } = avatar;
-            modelEntity.addComponent(ViewHelper); // listen avatarTargetChange
-            
             const { x, z } = modelEntity.transform.position;
             this.playerHelper.setup(x, z, modelEntity.parent);
             const startForward = 6; // start forward
             this.playerHelper.updateDir(startForward);
         })
-        
-        // 玩家的视角变化 - 玩家发生移动
-        // this.engine.on('avatarTargetChange', (newTarget) => {...});
 
         // 玩家从一个网格移动到另一个网格
         this.engine.on('gridCross', ({gridX, gridZ, x, z}) => {

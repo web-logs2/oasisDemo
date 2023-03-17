@@ -1,18 +1,5 @@
 import React, { useEffect } from 'react';
 import { BlinnPhongMaterial, MeshRenderer, PrimitiveMesh, WebGLEngine, 
-    Engine,
-    Mesh,
-    Shader,
-    BaseMaterial,
-    BufferMesh,
-    IndexFormat,
-    BufferBindFlag,
-    Buffer,
-    BufferUsage,
-    VertexElement,
-    VertexElementFormat,
-    Matrix,
-    RenderFace,
 } from 'oasis-engine';
 import CameraViewHelper from '../../Scripts/cameraViewHelper'
 import { initAvatarCamera, initScene, initLight } from './utils/env';
@@ -55,15 +42,28 @@ export default () => {
             const mapSystem = new MapSystem(engine, mockGrids as IGrid[]);
             rootEntity.addChild(mapSystem.mapRoot);
 
-            const sphere = initSphere(engine, 0.3);
-            sphere.transform.setPosition(2.5, 0.3, -2.5);
-            mapSystem.addToMap(sphere, {
-                animate: {
-                    type: 'enterLeave',
-                    target: [0, 2, 0],
-                    duration: 500,
-                }
-            });
+            for(let i = 0; i < 20; i++) {
+                const radius = 0.1 + Math.random() * 0.5;
+                const sphere = initSphere(engine, radius);
+                sphere.transform.setPosition(-10 + Math.random() * 20, radius, -10 + Math.random() * 20);
+                mapSystem.addToMap(sphere, {
+                    animate: {
+                        type: 'enterLeave',
+                        target: [0, 2 * Math.random() + 1, 0],
+                        duration: Math.random() * 300 + 200,
+                    }
+                });
+            }
+
+            // const sphere = initSphere(engine, 0.3);
+            // sphere.transform.setPosition(2.5, 0.3, -2.5);
+            // mapSystem.addToMap(sphere, {
+            //     animate: {
+            //         type: 'enterLeave',
+            //         target: [0, 2, 0],
+            //         duration: 500,
+            //     }
+            // });
 
             const cameraEntity = rootEntity.createChild("CameraParent");
             cameraEntity.addComponent(CameraViewHelper);

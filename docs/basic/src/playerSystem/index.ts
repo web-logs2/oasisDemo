@@ -1,11 +1,10 @@
-import { Entity, MeshRenderer, WebGLEngine } from "oasis-engine";
+import { Entity, WebGLEngine } from "oasis-engine";
 import BasicSystem from "../basicSystem";
 import MapSystem from "../map/index";
 import { GameCtrl } from '../GameCtrl/index';
 import { SocketEvent } from '../GameCtrl/event'
 import AnimateSystem from '../animateSystem/index';
 import { AnimateType, AnimatePlayType } from '../animateSystem/interface';
-import ViewHelper  from '../../../Scripts/viewHelper';
 import PlayerHelper from './playerHelper';
 import AreaSystem from './areaSystem';
 

@@ -69,18 +69,27 @@ export default class MapSystem {
         if(!grid) {
             return false;
         }
+        
+        
+        const { coverType = CoverType.FILL, animate, position } = options; // , gridX, gridZ
+
+        if(coverType === CoverType.FILL && grid.fill) {
+            return false;
+        }
 
         const entity = this.engine.createEntity('grid');
         entity.transform.position.set(x, 0, z); // 网格中心位置
-        this.mapRoot.addChild(entity);
+        
 
         const [centerX, centerZ] = MapSystem.gridXZ2xz(gridX, gridZ); // 网格中心的 x, z 笛卡尔坐标
         const [offsetX, offsetZ] = [x - centerX, z - centerZ]; // 网格中心到 object 的偏移量
 
+
+        this.mapRoot.addChild(entity);
         object.transform.position.set(offsetX, y, offsetZ); // 将 object 移动到网格中心（局部坐标系）
         entity.addChild(object);
 
-        const { coverType = CoverType.FILL, animate, position } = options; // , gridX, gridZ
+        
         const coverItem = {
             entity: object,
             coverType,

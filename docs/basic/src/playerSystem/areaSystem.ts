@@ -1,4 +1,5 @@
-import MapSystem, { IGrid } from "../map/index";
+import MapSystem from "../map/index";
+import { IGrid } from '../map/interface';
 
 export default class AreaSystem {
     private radius: number;
@@ -11,7 +12,7 @@ export default class AreaSystem {
     }
 
     setXZ(x: number, z: number) {
-        const [ gridX, gridZ ] = this.mapSystem.xz2Grid(x, z);
+        const [ gridX, gridZ ] = MapSystem.xz2Grid(x, z);
         this.update(gridX, gridZ);
     }
 

@@ -5,6 +5,7 @@ import { initAvatarCamera, initScene, initLight } from './utils/env';
 import { PhysXPhysics } from "@oasis-engine/physics-physx";
 import BasicSystem from './basicSystem';
 import PlayerSystem from './playerSystem';
+import UISystem from './uiSystem';
 import MapSystem from './map/index';
 import { mockGrids } from './map/helper';
 import { IGrid } from './map/interface';
@@ -56,9 +57,29 @@ export default () => {
             const debug = true;
             const avatarCamera = initAvatarCamera(rootEntity, cameraEntity, debug);
             const lightEntity = initLight(rootEntity);
+
+            const uiSystem = new UISystem({
+                miniMap: 'miniMap',
+                miniMapDynamic: 'miniMapDynamic',
+                grids: mockGrids as any[],
+            });
         
             const player = new PlayerSystem(engine, rootEntity, avatarCamera, lightEntity, basicSystem, mapSystem);
+            const [ gridX, gridZ ] = player.grid;
+            uiSystem.updateMiniMap([{
+                rotate: player.rotateY,
+                gridX,
+                gridZ,
+            }])
+            player.on('gridCross', (e) => {
+                uiSystem.updateMiniMap([{
+                    rotate: player.rotateY,
+                    gridX: e.gridX,
+                    gridZ: e.gridZ,
+                }])
+            })
         })
+        
         
     }, [])
     return <div style={{ position: 'relative', height: '500px' }}>
@@ -67,5 +88,7 @@ export default () => {
             height: '100%',
             outline: 'none',
         }}/>
+        <canvas id='miniMap'></canvas>
+        <canvas id='miniMapDynamic'></canvas>
     </div>
 };

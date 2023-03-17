@@ -37,7 +37,7 @@ export default class MapSystem {
 
     static isEqual(grid1: any, grid2: any) {
         // grid undefined / undefined grid
-        if(this.isGrid(grid1) !== this.isGrid(grid2)) return false;
+        if(MapSystem.isGrid(grid1) !== MapSystem.isGrid(grid2)) return false;
         // grid grid
         return grid1.id === grid2.id;
     }
@@ -50,8 +50,8 @@ export default class MapSystem {
             this.cache.set(gridData.id, gridData as IGrid);
 
             if(debug) {
-                const [gridX, gridY] = this.key2GridXZ(gridData.id);
-                const xz = this.gridXZ2xz(gridX, gridY);         
+                const [gridX, gridY] = MapSystem.key2GridXZ(gridData.id);
+                const xz = MapSystem.gridXZ2xz(gridX, gridY);         
                 const plane =  initPlane(this.engine, 0.8, 0.8, gridData.type)
                 plane.transform.position.set(xz[0], 0.01, xz[1]);
                 this.mapRoot.addChild(plane);
@@ -61,8 +61,8 @@ export default class MapSystem {
 
     addToMap(object: Entity, options: Partial<CoverItem> = { coverType: CoverType.FILL }) {
         const { x, y, z } = object.transform.position;
-        const [ gridX, gridZ ] = this.xz2Grid(x, z); // 获取网格坐标（序号）
-        const id = this.gridXZ2Key(gridX, gridZ);
+        const [ gridX, gridZ ] = MapSystem.xz2Grid(x, z); // 获取网格坐标（序号）
+        const id = MapSystem.gridXZ2Key(gridX, gridZ);
         const grid = this.cache.get(id) as IGrid;
         if(!grid) {
             return false;
@@ -72,7 +72,7 @@ export default class MapSystem {
         entity.transform.position.set(x, 0, z); // 网格中心位置
         this.mapRoot.addChild(entity);
 
-        const [centerX, centerZ] = this.gridXZ2xz(gridX, gridZ); // 网格中心的 x, z 笛卡尔坐标
+        const [centerX, centerZ] = MapSystem.gridXZ2xz(gridX, gridZ); // 网格中心的 x, z 笛卡尔坐标
         const [offsetX, offsetZ] = [x - centerX, z - centerZ]; // 网格中心到 object 的偏移量
 
         object.transform.position.set(offsetX, y, offsetZ); // 将 object 移动到网格中心（局部坐标系）
@@ -107,7 +107,7 @@ export default class MapSystem {
             if(!grid && this.collisionCubes[index + 1]) {
                 const dir = index + 1;
                 const [nearGridX, nearGrixZ] = this.getGridOffset(gridX, gridZ, dir);
-                const [x, y] = this.gridXZ2xz(nearGridX, nearGrixZ);
+                const [x, y] = MapSystem.gridXZ2xz(nearGridX, nearGrixZ);
                 const box = this.collisionCubes[dir];
                 // 暂时不考虑碰撞体的高度
                 box.transform.setPosition(x, 0.5, y);
@@ -237,7 +237,7 @@ export default class MapSystem {
      */
     coverTest(xz: number[], bounds: number[]) {
         const [x, z] = xz;
-        const [ gridX, gridZ ] = this.xz2Grid(x, z);
+        const [ gridX, gridZ ] = MapSystem.xz2Grid(x, z);
         const keys = this.getCoverGridKeys(gridX, gridZ, bounds);
         keys.forEach(({key}) => {
             const grid = this.cache.get(key);
@@ -271,7 +271,7 @@ export default class MapSystem {
             for(let j = 0; j < height; j++) {
                 const offsetX = gridX + i;
                 const offsetZ = gridZ + j;
-                const key = this.gridXZ2Key(offsetX, offsetZ);
+                const key = MapSystem.gridXZ2Key(offsetX, offsetZ);
                 gridKeys.push({
                     key,
                     gridX: gridX + i,
@@ -283,8 +283,8 @@ export default class MapSystem {
     }
 
     formatXZ(x: number, z: number) {
-        const [ gridX, gridZ ] = this.xz2Grid(x, z);
-        return this.gridXZ2xz(gridX, gridZ);
+        const [ gridX, gridZ ] = MapSystem.xz2Grid(x, z);
+        return MapSystem.gridXZ2xz(gridX, gridZ);
     }
 
     /**
@@ -293,7 +293,7 @@ export default class MapSystem {
      * @param gridZ 
      * @returns 
      */
-    gridXZ2xz(gridX: number, gridZ: number) {
+    static gridXZ2xz(gridX: number, gridZ: number) {
         const x = gridX * GRID_SIZE + GRID_SIZE / 2;
         const z = gridZ * GRID_SIZE + GRID_SIZE / 2;
         return [x, z];
@@ -305,7 +305,7 @@ export default class MapSystem {
      * @param z 
      * @returns 
      */
-    xz2Grid(x: number, z: number) {
+    static xz2Grid(x: number, z: number) {
         /**
         * (0, 0) --------> X > 0
         * ｜
@@ -340,7 +340,7 @@ export default class MapSystem {
      * @param gridZ 
      * @returns 
      */
-    gridXZ2Key(gridX: number, gridZ: number) {
+    static gridXZ2Key(gridX: number, gridZ: number) {
         return `${gridX}.${gridZ}`;
     }
 
@@ -349,7 +349,7 @@ export default class MapSystem {
      * @param key 
      * @returns 
      */
-    key2GridXZ(key: string) {
+    static key2GridXZ(key: string) {
         const [gridX, gridZ] = key.split('.');
         return [Number(gridX), Number(gridZ)];
     }

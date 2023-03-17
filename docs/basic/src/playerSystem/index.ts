@@ -1,5 +1,4 @@
 import { Entity, MeshRenderer, WebGLEngine } from "oasis-engine";
-import { PhysXPhysics } from "@oasis-engine/physics-physx";
 import BasicSystem from "../basicSystem";
 import MapSystem from "../map/index";
 import { GameCtrl } from '../GameCtrl/index';
@@ -18,6 +17,18 @@ export default class PlayerSystem {
     private animateSystem: AnimateSystem;
     private areaSystem: AreaSystem;
     private playerHelper: PlayerHelper;
+
+    private bindEvents: {
+        [key: string]: (values: any) => void;
+    } = {};
+
+    get rotateY() {
+        return this.playerHelper.rotateY;
+    }
+
+    get grid() {
+        return this.playerHelper.grid;
+    }
     
     constructor(engine: WebGLEngine, rootEntity: Entity, camera: Entity, lightEntity: Entity, basicSystem: BasicSystem, mapSystem: MapSystem) {
         this.engine = engine;
@@ -57,6 +68,10 @@ export default class PlayerSystem {
         this.engine.dispatch(SocketEvent.enterAvatar_ToG, [myAvatar]); // load avatar
     }
 
+    on(event: string, callback: (values: any) => void) {
+        this.bindEvents[event] = callback;
+    }
+
     bindEvent() {
         // 注册人物移动的监听 - target change
         this.engine.on('gameCtrlCreateUnit', (unit) => unit.entity.addComponent(ViewHelper));
@@ -78,6 +93,7 @@ export default class PlayerSystem {
         // 玩家从一个网格移动到另一个网格
         this.engine.on('gridCross', ({gridX, gridZ, x, z}) => {
             this.onGridCross(gridX, gridZ, x, z);
+            this.bindEvents['gridCross'] && this.bindEvents['gridCross']({gridX, gridZ, x, z});
         });
     }
 
@@ -129,7 +145,4 @@ export default class PlayerSystem {
             })
         });
     }
-
-    
-
 }

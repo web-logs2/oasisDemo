@@ -25,8 +25,12 @@ export default class PlayerHelper {
         if(this.player) {
             return this.player.transform.rotation.y;
         } else {
-            return 0;
+            return 90;
         }
+    }
+
+    get grid() {
+        return this.playerGridXY;
     }
 
     constructor(engine: WebGLEngine, mapSystem: MapSystem) {
@@ -42,8 +46,8 @@ export default class PlayerHelper {
             this.setup(x, z);
             return;
         }
-        const [ gridX, gridZ ] = this.mapSystem.xz2Grid(x, z);
-        const [ centerX, centerZ ] = this.mapSystem.gridXZ2xz(gridX, gridZ);
+        const [ gridX, gridZ ] = MapSystem.xz2Grid(x, z);
+        const [ centerX, centerZ ] = MapSystem.gridXZ2xz(gridX, gridZ);
         if(this.isMoved(centerX, centerZ)) {
             this.playerGridXY = [centerX, centerZ];
             this.updateHelper(gridX, gridZ);

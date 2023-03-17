@@ -23,6 +23,23 @@ export function initPlane(engine: WebGLEngine, width: number, height: number, ty
     return entity;
 }
 
+export function gridColor(type: string) {
+    switch(type) {
+        case 'grass':
+            return [0, 0.8, 0, 1];
+        case 'sand':
+            return [0.8, 0.8, 0, 1]
+        case 'rock':
+            return [0.3, 0.3, 0.3, 1]
+        default:
+            return [0.6, 0.6, 0.6, 1];
+    }
+}
+
+export function color2Rgb(color: number[]) {
+    const [r, g, b] = color;
+    return `rgb(${r * 255}, ${g * 255}, ${b * 255})`;
+}
 export function addColliderCubes(engine: WebGLEngine, root: Entity) {
     const cube1 = createColliderCube(engine, root, 1, 1, 1, 0);
     cube1.transform.position.y = -1;

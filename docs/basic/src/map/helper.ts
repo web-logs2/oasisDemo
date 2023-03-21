@@ -71,6 +71,9 @@ export function addColliderCubes(engine: WebGLEngine, root: Entity) {
     const cube4 = createColliderCube(engine, root, 1, 1, 1, 0);
     cube4.transform.position.y = -1;
     root.addChild(cube4);
+    const cube5 = createColliderCube(engine, root, 1, 1, 1, 0);
+    cube5.transform.position.y = -1;
+    root.addChild(cube5);
     const cube6 = createColliderCube(engine, root, 1, 1, 1, 0);
     cube6.transform.position.y = -1;
     root.addChild(cube6);
@@ -88,6 +91,7 @@ export function addColliderCubes(engine: WebGLEngine, root: Entity) {
         2: cube2,
         3: cube3,
         4: cube4,
+        5: cube5,
         6: cube6,
         7: cube7,
         8: cube8,
@@ -100,6 +104,8 @@ export function createColliderCube(engine: WebGLEngine, rootEntity: Entity, x: n
     const cubeRenderer = cubeEntity.addComponent(MeshRenderer);
     cubeRenderer.mesh = PrimitiveMesh.createCuboid(engine, x, y, z);
     const material = new BlinnPhongMaterial(engine);
+    material.baseColor.a = 0.8;
+    material.isTransparent = true;
     cubeRenderer.setMaterial(material);
 
     const boxCollider: StaticCollider = cubeEntity.addComponent(StaticCollider);

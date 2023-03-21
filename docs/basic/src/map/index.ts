@@ -52,8 +52,8 @@ export default class MapSystem {
             this.cache.set(gridData.id, gridData as IGrid);
 
             if(debug) {
-                const [gridX, gridY] = MapSystem.key2GridXZ(gridData.id);
-                const xz = MapSystem.gridXZ2xz(gridX, gridY);         
+                const [gridX, gridZ] = MapSystem.key2GridXZ(gridData.id);
+                const xz = MapSystem.gridXZ2xz(gridX, gridZ);         
                 const plane =  initPlane(this.engine, 0.8, 0.8, gridData.type)
                 plane.transform.position.set(xz[0], 0.01, xz[1]);
                 this.mapRoot.addChild(plane);
@@ -118,11 +118,19 @@ export default class MapSystem {
             if(!grid && this.collisionCubes[index + 1]) {
                 const dir = index + 1;
                 const [nearGridX, nearGrixZ] = this.getGridOffset(gridX, gridZ, dir);
-                const [x, y] = MapSystem.gridXZ2xz(nearGridX, nearGrixZ);
+                const [x, z] = MapSystem.gridXZ2xz(nearGridX, nearGrixZ);
                 const box = this.collisionCubes[dir];
                 // 暂时不考虑碰撞体的高度
-                box.transform.setPosition(x, 0.5, y);
+                box.transform.setPosition(x, 0.5, z);
             };
+            if(grid && grid.type === 'rock' && this.collisionCubes[index + 1]) {
+                const dir = index + 1;
+                const [nearGridX, nearGrixZ] = this.getGridOffset(gridX, gridZ, dir);
+                const [x, z] = MapSystem.gridXZ2xz(nearGridX, nearGrixZ);
+                const box = this.collisionCubes[dir];
+                // 暂时模拟碰撞体的高度
+                box.transform.setPosition(x, -0.5 + 0.4, z);
+            }
         });
         
     }
